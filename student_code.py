@@ -142,6 +142,39 @@ class KnowledgeBase(object):
         """
         ####################################################
         # Student code goes here
+        if (not isinstance(fact_or_rule, Rule)) and (not factq(fact_or_rule)):
+            return "This is not a fact or rule"
+        elif factq(fact_or_rule):
+            if fact_or_rule not in self.facts:
+                return "Fact is not in the KB\n"
+            else:
+                return self.kb_explain_sup(self._get_fact(fact_or_rule), 0)
+        else:
+            if fact_or_rule not in self.rules:
+                return "Rule is not in the KB\n"
+            else:
+                return self.kb_explain_sup(self._get_rule(fact_or_rule), 0)
+    def kb_explain_sup(self, fact_or_rule, indents):
+        sup_string = ""
+        if factq(fact_or_rule):
+            sup_string += "fact: " + str(fact_or_rule.statement)
+        elif isinstance(fact_or_rule, Rule):
+            lhs = str(fact_or_rule.lhs[0])
+            for i in fact_or_rule.lhs[1:]:
+                lhs += ", " + str(i)
+            sup_string += "rule: (" + lhs + ") -> " + str(fact_or_rule.rhs)
+
+        if fact_or_rule.asserted:
+            sup_string += " ASSERTED"
+
+        sup_string += "\n"
+
+        for sups in fact_or_rule.supported_by:
+            sup_string += "  " * (indents + 1) + "SUPPORTED BY\n"
+            for i in sups:
+                sup_string += "  " * (indents + 2) + self.kb_explain_sup(i, indents + 2)
+
+        return sup_string
 
 
 class InferenceEngine(object):
